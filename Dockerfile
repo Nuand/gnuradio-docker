@@ -69,8 +69,10 @@ RUN sudo ldconfig
 
 # GNURADIO
 ############
+RUN sudo apt install -y pybind11-dev python3-matplotlib libsndfile1-dev
+
 WORKDIR $HOME
-RUN git clone https://github.com/gnuradio/gnuradio.git -b maint-3.8
+RUN git clone https://github.com/gnuradio/gnuradio.git -b maint-3.9
 
 WORKDIR $HOME/gnuradio
 RUN mkdir build 
@@ -79,17 +81,28 @@ RUN cmake -DENABLE_INTERNAL_VOLK=OFF -DCMAKE_BUILD_TYPE=Release ..
 RUN make -j$(nproc)
 RUN sudo make install
 
+# gr-iqbal
+############
+WORKDIR $HOME
+RUN git clone git://git.osmocom.org/gr-iqbal
+WORKDIR $HOME/gr-iqbal
+RUN git submodule update --init --recursive
+RUN mkdir build
+WORKDIR $HOME/gr-iqbal/build
+RUN cmake ..
+RUN make -j$(nproc) 
+RUN sudo make install && sudo ldconfig
+
 # gr-osmosdr
 #############
 WORKDIR $HOME
 RUN git clone https://git.osmocom.org/gr-osmosdr
 WORKDIR $HOME/gr-osmosdr
-RUN git checkout gr3.8
 RUN mkdir build 
 WORKDIR $HOME/gr-osmosdr/build/
 RUN cmake ..
 RUN make -j$(nproc)
-RUN sudo make install
+RUN sudo make install && sudo ldconfig
 
 #GQRX
 #############
